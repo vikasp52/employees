@@ -1,3 +1,4 @@
+import 'package:employees/features/add_edit_employees/add_edit_employee.dart';
 import 'package:employees/features/employees/screens/employees.dart';
 import 'package:flutter/material.dart';
 
@@ -39,7 +40,7 @@ class RouteGenerator {
         screen = const Employees();
         break;
       case addEditEmployeeRoute:
-        screen = const Employees();
+        screen = const AddEditEmployee();
         break;
 
       default:

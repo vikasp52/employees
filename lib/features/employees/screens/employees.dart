@@ -1,4 +1,5 @@
 import 'package:employees/core/assets/assets.dart';
+import 'package:employees/core/routing/routing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -156,7 +157,9 @@ class Employees extends StatelessWidget {
                       ),
                     ),
                     child: IconButton(
-                      onPressed: () {},
+                      onPressed: () => RouteGenerator.pushName(
+                        routeName: RouteGenerator.addEditEmployeeRoute,
+                      ),
                       icon: const Icon(
                         Icons.add,
                         color: CustomColors.color12,

@@ -51,6 +51,12 @@ class CustomTypography {
     fontWeight: FontWeight.w400,
   );
 
+    static final buttonLabel = TextStyle(
+    color: CustomColors.color12,
+    fontSize: 14.sp,
+    fontWeight: FontWeight.w500,
+  );
+
   static final undoLabel = TextStyle(
     color: CustomColors.color1,
     fontSize: 15.sp,

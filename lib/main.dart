@@ -1,10 +1,12 @@
 import 'package:employees/core/assets/assets.dart';
 import 'package:employees/core/routing/routing.dart';
-import 'package:employees/features/employees/screens/employees.dart';
+import 'package:employees/features/employees/presentation/screens/employees.dart';
 import 'package:flutter/material.dart';
+import 'package:employees/core/di/inection_container.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 void main() {
+  setUp();
   runApp(const MyApp());
 }
 
@@ -23,7 +25,7 @@ class MyApp extends StatelessWidget {
         onGenerateRoute: RouteGenerator.generateRoute,
         debugShowCheckedModeBanner: false,
       ),
-      child: const Employees(),
+      // child: const Employees(),
     );
   }
 }

@@ -1,13 +1,30 @@
 import 'package:employees/core/assets/assets.dart';
+import 'package:employees/features/employees/data/model/employee.dart';
+import 'package:employees/features/employees/presentation/cubit/add_edit_employee_dart_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-class AddEditEmployee extends StatelessWidget {
+class AddEditEmployee extends StatefulWidget {
   const AddEditEmployee({super.key});
 
   @override
+  State<AddEditEmployee> createState() => _AddEditEmployeeState();
+}
+
+class _AddEditEmployeeState extends State<AddEditEmployee> {
+  final _employeeName = TextEditingController();
+
+  @override
+  void dispose() {
+    _employeeName.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final cubit = context.read<AddEditEmployeeDartCubit>();
     return Scaffold(
       backgroundColor: CustomColors.color12,
       appBar: AppBar(
@@ -210,7 +227,15 @@ class AddEditEmployee extends StatelessWidget {
                   width: 20.w,
                 ),
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    cubit.addEmployee(
+                      const Employee(
+                        name: 'Vikas',
+                        role: 'Software developer',
+                        startDate: 'dsdsd',
+                      ),
+                    );
+                  },
                   child: const Text(
                     'Save',
                   ),

@@ -13,10 +13,11 @@ class EmployeeRepository {
     Employee employee,
   ) async {
     try {
+      print('employee details: $employee');
       final id = await _employeeDataSource.saveEmployeeDetails(
         employee,
       );
-
+      print('employee id: $id');
       return Right(id);
     } catch (error) {
       if (error is DatabaseException) {
@@ -41,7 +42,7 @@ class EmployeeRepository {
     }
   }
 
-  Future<Either<String, List<Employee>>> deleteEmployees(
+  Future<Either<String, int>> deleteEmployees(
     Employee employee,
   ) async {
     try {
@@ -51,6 +52,7 @@ class EmployeeRepository {
 
       return Right(employees);
     } catch (error) {
+      print('error is: $error');
       if (error is DatabaseException) {
         return Left(error.result.toString());
       } else {

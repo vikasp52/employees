@@ -11,7 +11,7 @@ class Employees extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    //final cubit = context.read<EmployeesCubit>();
+    final cubit = context.read<EmployeesCubit>();
     return Scaffold(
       floatingActionButton: Container(
         decoration: BoxDecoration(
@@ -39,10 +39,21 @@ class Employees extends StatelessWidget {
         ),
       ),
       body: BlocBuilder<EmployeesCubit, EmployeesState>(
+        buildWhen: (previous, current) => current.maybeWhen(
+            loading: () => true,
+            loaded: (employee) => true,
+            error: (message) => true,
+            orElse: () => false),
         builder: (context, state) {
           return state.maybeWhen(
             loading: () => const Center(
               child: CircularProgressIndicator(),
+            ),
+            error: (message) => Center(
+              child: Text(
+                message,
+                style: CustomTypography.dropdownValue,
+              ),
             ),
             loaded: (employees) {
               if (employees.isEmpty) {
@@ -61,6 +72,14 @@ class Employees extends StatelessWidget {
                   ),
                 );
               }
+
+              final currentEmployees = employees
+                  .where((employee) => employee.endDate == null)
+                  .toList();
+              final previousEmployees = employees
+                  .where((employee) => employee.endDate != null)
+                  .toList();
+
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -75,97 +94,208 @@ class Employees extends StatelessWidget {
                   ),
                   Expanded(
                     flex: 4,
-                    child: Container(
-                      color: CustomColors.color12,
-                      child: ListView.builder(
-                        itemCount: employees.length,
-                        itemBuilder: (context, index) {
-                          final employee = employees[index];
-                          return Column(
-                            children: [
-                              Slidable(
-                                endActionPane: ActionPane(
-                                  motion: const ScrollMotion(),
+                    child: currentEmployees.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Image.asset(
+                                  'assets/no_employee_found.png',
+                                  height: 70.h,
+                                ),
+                                Text(
+                                  'No employee records found',
+                                  style: CustomTypography.notFoundLabel,
+                                ),
+                              ],
+                            ),
+                          )
+                        : Container(
+                            color: CustomColors.color12,
+                            child: ListView.builder(
+                              itemCount: currentEmployees.length,
+                              itemBuilder: (context, index) {
+                                final employee = employees[index];
+                                return Column(
                                   children: [
-                                    SlidableAction(
-                                      onPressed: (context) {},
-                                      backgroundColor: CustomColors.color1,
-                                      foregroundColor: CustomColors.color12,
-                                      icon: Icons.edit_square,
-                                      label: 'Edit',
+                                    Slidable(
+                                      endActionPane: ActionPane(
+                                        motion: const ScrollMotion(),
+                                        children: [
+                                          SlidableAction(
+                                            onPressed: (context) {},
+                                            backgroundColor:
+                                                CustomColors.color1,
+                                            foregroundColor:
+                                                CustomColors.color12,
+                                            icon: Icons.edit_square,
+                                            label: 'Edit',
+                                          ),
+                                          SlidableAction(
+                                            onPressed: (context) {
+                                              showDialog(
+                                                context: context,
+                                                builder:
+                                                    (BuildContext context) {
+                                                  return BlocProvider.value(
+                                                    value: cubit,
+                                                    child: AlertDialog(
+                                                      title: const Text(
+                                                          'Delete Employee'),
+                                                      content: const Text(
+                                                          'Are you sure you want to delete this employee'),
+                                                      actions: <Widget>[
+                                                        TextButton(
+                                                          child: const Text(
+                                                              'Cancel'),
+                                                          onPressed: () {
+                                                            Navigator.of(
+                                                                    context)
+                                                                .pop(); // Close the dialog
+                                                          },
+                                                        ),
+                                                        BlocConsumer<
+                                                            EmployeesCubit,
+                                                            EmployeesState>(
+                                                          buildWhen: (previous,
+                                                                  current) =>
+                                                              current.maybeWhen(
+                                                            deleteInProgress:
+                                                                () => true,
+                                                            deletedSuccessfully:
+                                                                () => true,
+                                                            errorInDeleting:
+                                                                (message) =>
+                                                                    true,
+                                                            orElse: () => false,
+                                                          ),
+                                                          listener:
+                                                              (context, state) {
+                                                            state.maybeWhen(
+                                                              errorInDeleting:
+                                                                  (message) {
+                                                                ScaffoldMessenger.of(
+                                                                        context)
+                                                                    .showSnackBar(
+                                                                  SnackBar(
+                                                                    content:
+                                                                        Text(
+                                                                      message,
+                                                                      style: CustomTypography
+                                                                          .snackBarMessage,
+                                                                    ),
+                                                                  ),
+                                                                );
+                                                                Navigator.of(
+                                                                        context)
+                                                                    .pop();
+                                                              },
+                                                              deletedSuccessfully:
+                                                                  () {
+                                                                cubit
+                                                                    .getEmployees();
+                                                                ScaffoldMessenger.of(
+                                                                        context)
+                                                                    .showSnackBar(
+                                                                  SnackBar(
+                                                                    content:
+                                                                        Text(
+                                                                      'Employee data has been deleted',
+                                                                      style: CustomTypography
+                                                                          .snackBarMessage,
+                                                                    ),
+                                                                  ),
+                                                                );
+                                                                Navigator.of(
+                                                                        context)
+                                                                    .pop();
+                                                              },
+                                                              orElse: () {},
+                                                            );
+                                                          },
+                                                          builder:
+                                                              (context, state) {
+                                                            return state
+                                                                .maybeWhen(
+                                                              deleteInProgress:
+                                                                  () => Padding(
+                                                                padding: EdgeInsets
+                                                                    .symmetric(
+                                                                        horizontal:
+                                                                            30.w),
+                                                                child: SizedBox(
+                                                                  height: 25.h,
+                                                                  width: 20.w,
+                                                                  child:
+                                                                      CircularProgressIndicator(
+                                                                    strokeWidth:
+                                                                        2.5.w,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                              orElse: () =>
+                                                                  TextButton(
+                                                                child:
+                                                                    const Text(
+                                                                        'Yes'),
+                                                                onPressed: () {
+                                                                  cubit.deleteEmployees(
+                                                                      employee);
+                                                                },
+                                                              ),
+                                                            );
+                                                          },
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  );
+                                                },
+                                              );
+                                            },
+                                            backgroundColor:
+                                                CustomColors.color11,
+                                            foregroundColor:
+                                                CustomColors.color12,
+                                            icon: Icons.delete,
+                                            label: 'Delete',
+                                          ),
+                                        ],
+                                      ),
+                                      child: ListTile(
+                                        title: Text(
+                                          employee.name ?? '',
+                                          style: CustomTypography.subTitle,
+                                        ),
+                                        subtitle: Padding(
+                                          padding: EdgeInsets.symmetric(
+                                              vertical: 10.h),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Full-stack Developer',
+                                                style: CustomTypography
+                                                    .dropdownHint,
+                                              ),
+                                              SizedBox(
+                                                height: 10.h,
+                                              ),
+                                              Text(
+                                                '1 Jul, 2022 - 22 Dec, 2023',
+                                                style: CustomTypography.date,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
                                     ),
-                                    SlidableAction(
-                                      onPressed: (context) {
-                                        showDialog(
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return AlertDialog(
-                                              title:
-                                                  const Text('Delete Employee'),
-                                              content: const Text(
-                                                  'Are you sure you want to delete this employee'),
-                                              actions: <Widget>[
-                                                TextButton(
-                                                  child: const Text('Cancel'),
-                                                  onPressed: () {
-                                                    Navigator.of(context)
-                                                        .pop(); // Close the dialog
-                                                  },
-                                                ),
-                                                TextButton(
-                                                  child: const Text('Yes'),
-                                                  onPressed: () {
-                                                    // Perform some action
-                                                    Navigator.of(context)
-                                                        .pop(); // Close the dialog
-                                                  },
-                                                ),
-                                              ],
-                                            );
-                                          },
-                                        );
-                                      },
-                                      backgroundColor: CustomColors.color11,
-                                      foregroundColor: CustomColors.color12,
-                                      icon: Icons.delete,
-                                      label: 'Delete',
-                                    ),
+                                    const Divider(),
                                   ],
-                                ),
-                                child: ListTile(
-                                  title: Text(
-                                    employee.name ?? '',
-                                    style: CustomTypography.subTitle,
-                                  ),
-                                  subtitle: Padding(
-                                    padding:
-                                        EdgeInsets.symmetric(vertical: 10.h),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'Full-stack Developer',
-                                          style: CustomTypography.dropdownHint,
-                                        ),
-                                        SizedBox(
-                                          height: 10.h,
-                                        ),
-                                        Text(
-                                          '1 Jul, 2022 - 22 Dec, 2023',
-                                          style: CustomTypography.date,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const Divider(),
-                            ],
-                          );
-                        },
-                      ),
-                    ),
+                                );
+                              },
+                            ),
+                          ),
                   ),
                   Padding(
                     padding: EdgeInsets.all(
@@ -178,42 +308,67 @@ class Employees extends StatelessWidget {
                   ),
                   Expanded(
                     flex: 4,
-                    child: ListView.builder(
-                      itemCount: employees.length,
-                      itemBuilder: (context, index) => Container(
-                        color: CustomColors.color12,
-                        child: Column(
-                          children: [
-                            ListTile(
-                              title: Text(
-                                'Samantha Lee',
-                                style: CustomTypography.subTitle,
-                              ),
-                              subtitle: Padding(
-                                padding: EdgeInsets.symmetric(vertical: 10.h),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Full-stack Developer',
-                                      style: CustomTypography.dropdownHint,
-                                    ),
-                                    SizedBox(
-                                      height: 10.h,
-                                    ),
-                                    Text(
-                                      '1 Jul, 2022 - 22 Dec, 2023',
-                                      style: CustomTypography.date,
-                                    ),
-                                  ],
+                    child: previousEmployees.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Image.asset(
+                                  'assets/no_employee_found.png',
+                                  height: 70.h,
                                 ),
-                              ),
+                                Text(
+                                  'No employee records found',
+                                  style: CustomTypography.notFoundLabel,
+                                ),
+                              ],
                             ),
-                            const Divider(),
-                          ],
-                        ),
-                      ),
-                    ),
+                          )
+                        : Container(
+                            color: CustomColors.color12,
+                            child: ListView.builder(
+                              itemCount: previousEmployees.length,
+                              itemBuilder: (context, index) {
+                                final employee = previousEmployees[index];
+                                return Container(
+                                  color: CustomColors.color12,
+                                  child: Column(
+                                    children: [
+                                      ListTile(
+                                        title: Text(
+                                          employee.name ?? '',
+                                          style: CustomTypography.subTitle,
+                                        ),
+                                        subtitle: Padding(
+                                          padding: EdgeInsets.symmetric(
+                                              vertical: 10.h),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Full-stack Developer',
+                                                style: CustomTypography
+                                                    .dropdownHint,
+                                              ),
+                                              SizedBox(
+                                                height: 10.h,
+                                              ),
+                                              Text(
+                                                '1 Jul, 2022 - 22 Dec, 2023',
+                                                style: CustomTypography.date,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                      const Divider(),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
                   ),
                   Expanded(
                     flex: 1,

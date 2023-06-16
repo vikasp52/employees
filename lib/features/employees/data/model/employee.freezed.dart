@@ -20,6 +20,7 @@ Employee _$EmployeeFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$Employee {
+  int? get id => throw _privateConstructorUsedError;
   String? get name => throw _privateConstructorUsedError;
   String? get role => throw _privateConstructorUsedError;
   String? get startDate => throw _privateConstructorUsedError;
@@ -36,7 +37,12 @@ abstract class $EmployeeCopyWith<$Res> {
   factory $EmployeeCopyWith(Employee value, $Res Function(Employee) then) =
       _$EmployeeCopyWithImpl<$Res, Employee>;
   @useResult
-  $Res call({String? name, String? role, String? startDate, String? endDate});
+  $Res call(
+      {int? id,
+      String? name,
+      String? role,
+      String? startDate,
+      String? endDate});
 }
 
 /// @nodoc
@@ -52,12 +58,17 @@ class _$EmployeeCopyWithImpl<$Res, $Val extends Employee>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? id = freezed,
     Object? name = freezed,
     Object? role = freezed,
     Object? startDate = freezed,
     Object? endDate = freezed,
   }) {
     return _then(_value.copyWith(
+      id: freezed == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as int?,
       name: freezed == name
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
@@ -85,7 +96,12 @@ abstract class _$$_EmployeeCopyWith<$Res> implements $EmployeeCopyWith<$Res> {
       __$$_EmployeeCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String? name, String? role, String? startDate, String? endDate});
+  $Res call(
+      {int? id,
+      String? name,
+      String? role,
+      String? startDate,
+      String? endDate});
 }
 
 /// @nodoc
@@ -99,12 +115,17 @@ class __$$_EmployeeCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? id = freezed,
     Object? name = freezed,
     Object? role = freezed,
     Object? startDate = freezed,
     Object? endDate = freezed,
   }) {
     return _then(_$_Employee(
+      id: freezed == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as int?,
       name: freezed == name
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
@@ -129,7 +150,8 @@ class __$$_EmployeeCopyWithImpl<$Res>
 @JsonSerializable()
 class _$_Employee implements _Employee {
   const _$_Employee(
-      {required this.name,
+      {this.id,
+      required this.name,
       required this.role,
       required this.startDate,
       this.endDate});
@@ -137,6 +159,8 @@ class _$_Employee implements _Employee {
   factory _$_Employee.fromJson(Map<String, dynamic> json) =>
       _$$_EmployeeFromJson(json);
 
+  @override
+  final int? id;
   @override
   final String? name;
   @override
@@ -148,7 +172,7 @@ class _$_Employee implements _Employee {
 
   @override
   String toString() {
-    return 'Employee(name: $name, role: $role, startDate: $startDate, endDate: $endDate)';
+    return 'Employee(id: $id, name: $name, role: $role, startDate: $startDate, endDate: $endDate)';
   }
 
   @override
@@ -156,6 +180,7 @@ class _$_Employee implements _Employee {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$_Employee &&
+            (identical(other.id, id) || other.id == id) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.role, role) || other.role == role) &&
             (identical(other.startDate, startDate) ||
@@ -165,7 +190,8 @@ class _$_Employee implements _Employee {
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, name, role, startDate, endDate);
+  int get hashCode =>
+      Object.hash(runtimeType, id, name, role, startDate, endDate);
 
   @JsonKey(ignore: true)
   @override
@@ -183,13 +209,16 @@ class _$_Employee implements _Employee {
 
 abstract class _Employee implements Employee {
   const factory _Employee(
-      {required final String? name,
+      {final int? id,
+      required final String? name,
       required final String? role,
       required final String? startDate,
       final String? endDate}) = _$_Employee;
 
   factory _Employee.fromJson(Map<String, dynamic> json) = _$_Employee.fromJson;
 
+  @override
+  int? get id;
   @override
   String? get name;
   @override

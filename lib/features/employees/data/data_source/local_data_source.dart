@@ -36,25 +36,29 @@ class EmployeeLocalDataSource {
   ) async {
     final db = await SQLHelper.db();
 
-    final result = db.update(
+    final result = await db.update(
       LocalDBConstants.tableName,
       employee.toJson(),
       where: '${LocalDBConstants.id}  = ?',
-      whereArgs: [LocalDBConstants.id],
+      whereArgs: [employee.id],
     );
 
     return result;
   }
 
-  Future deleteEmployee(
+  Future<int> deleteEmployee(
     Employee employee,
   ) async {
     final db = await SQLHelper.db();
 
-    db.delete(
+    final result = await db.delete(
       LocalDBConstants.tableName,
       where: '${LocalDBConstants.id}  = ?',
-      whereArgs: [LocalDBConstants.id],
+      whereArgs: [employee.id],
     );
+
+    print('deleteEmployee: $result');
+
+    return result;
   }
 }

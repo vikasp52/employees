@@ -20,9 +20,11 @@ class EmployeesCubit extends Cubit<EmployeesState> {
   Future<void> getEmployees() async {
     emit(const EmployeesState.loading());
 
-    final validate = await employeeRepository.getEmployees();
+    final employees = await employeeRepository.getEmployees();
 
-    validate.fold(
+    print('employees in cubit: ${employees.length()}');
+
+    employees.fold(
       (l) => emit(EmployeesState.error(
         l,
       )),
@@ -32,17 +34,27 @@ class EmployeesCubit extends Cubit<EmployeesState> {
     );
   }
 
-  Future<void> deleteEmployees() async {
-    emit(const EmployeesState.loading());
+  Future<void> deleteEmployees(
+    Employee employee,
+  ) async {
+    emit(
+      const EmployeesState.deleteInProgress(),
+    );
 
-    final validate = await employeeRepository.getEmployees();
+    final validate = await employeeRepository.deleteEmployees(
+      employee,
+    );
 
     validate.fold(
-      (l) => emit(EmployeesState.error(
-        l,
-      )),
+      (l) => emit(
+        EmployeesState.errorInDeleting(
+          l,
+        ),
+      ),
       (r) async {
-        emit(EmployeesState.loaded(r));
+        emit(
+          const EmployeesState.deletedSuccessfully(),
+        );
       },
     );
   }

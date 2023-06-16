@@ -22,11 +22,11 @@ class AddEditEmployeeDartCubit extends Cubit<AddEditEmployeeDartState> {
   ) async {
     emit(const AddEditEmployeeDartState.savingDetailsInProgress());
 
-    final validate = await employeeRepository.saveEmployeeDetails(
+    final employeeDetails = await employeeRepository.saveEmployeeDetails(
       employee,
     );
 
-    validate.fold(
+    employeeDetails.fold(
       (l) => emit(
         AddEditEmployeeDartState.error(
           l,

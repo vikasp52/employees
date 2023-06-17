@@ -52,7 +52,7 @@ class RouteGenerator {
         break;
       case addEditEmployeeRoute:
         screen = BlocProvider(
-          create: (context) => AddEditEmployeeDartCubit(
+          create: (context) => AddEditEmployeeCubit(
             serviceLocator<EmployeeRepository>(),
           ),
           child: const AddEditEmployee(),

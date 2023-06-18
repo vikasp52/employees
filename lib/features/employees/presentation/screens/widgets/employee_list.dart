@@ -156,14 +156,27 @@ class EmployeeList extends StatelessWidget {
                       SizedBox(
                         height: 10.h,
                       ),
-                      Text(
-                        'From ${DateFormat('dd MMMM, yyyy').format(
-                          DateTime.parse(
-                            employee.startDate ?? '',
-                          ),
-                        )}',
-                        style: CustomTypography.date,
-                      ),
+                      (employee.endDate != null && employee.endDate!.isNotEmpty)
+                          ? Text(
+                              '${DateFormat('dd MMMM, yyyy').format(
+                                DateTime.parse(
+                                  employee.startDate ?? '',
+                                ),
+                              )} - ${DateFormat('dd MMMM, yyyy').format(
+                                DateTime.parse(
+                                  employee.endDate ?? '',
+                                ),
+                              )}',
+                              style: CustomTypography.date,
+                            )
+                          : Text(
+                              'From ${DateFormat('dd MMMM, yyyy').format(
+                                DateTime.parse(
+                                  employee.startDate ?? '',
+                                ),
+                              )}',
+                              style: CustomTypography.date,
+                            ),
                     ],
                   ),
                 ),

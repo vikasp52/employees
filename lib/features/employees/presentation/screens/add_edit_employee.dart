@@ -16,23 +16,8 @@ class AddEditEmployee extends StatefulWidget {
 
 class _AddEditEmployeeState extends State<AddEditEmployee> {
   final _calendarFormat = CalendarFormat.month;
-  final nameController = TextEditingController();
   final firstDay = DateTime.utc(2010, 10, 16);
   final lastDay = DateTime.utc(2030, 3, 14);
-
-  @override
-  void dispose() {
-    nameController.dispose();
-    super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    context.read<AddEditEmployeeCubit>().stream.listen((event) {
-      print('event.name called');
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,11 +43,6 @@ class _AddEditEmployeeState extends State<AddEditEmployee> {
               ),
             );
           }
-
-          // if (cubit.employee != null && cubit.employee!.name != null) {
-          //   print('Name is: ${cubit.employee!.name!}');
-          //   nameController.text = cubit.employee!.name!;
-          // }
 
           if (state.isSaved) {
             Navigator.pop(context, true);
@@ -111,31 +91,8 @@ class _AddEditEmployeeState extends State<AddEditEmployee> {
                                 topRight: Radius.circular(20.w),
                               ),
                             ),
-                            builder: (context) => Wrap(
-                              children: [
-                                'Product Designer',
-                                'Flutter Developer',
-                                'QA Tester',
-                                'Product Owner'
-                              ]
-                                  .map(
-                                    (e) => Column(
-                                      children: [
-                                        ListTile(
-                                          onTap: () {
-                                            cubit.updateRole(e);
-                                            Navigator.pop(context);
-                                          },
-                                          title: Text(
-                                            e,
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ),
-                                        const Divider(),
-                                      ],
-                                    ),
-                                  )
-                                  .toList(),
+                            builder: (context) => SelectRole(
+                              cubit: cubit,
                             ),
                           );
                         },
@@ -172,50 +129,10 @@ class _AddEditEmployeeState extends State<AddEditEmployee> {
                     ),
                     Row(
                       children: [
-                        Expanded(
-                          child: ListTile(
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 10.w,
-                            ),
-                            onTap: () => showDialog(
-                              context: context,
-                              builder: (context) => SelectDateDialog(
-                                cubit: cubit,
-                                firstDay: firstDay,
-                                lastDay: lastDay,
-                                calendarFormat: _calendarFormat,
-                              ),
-                            ),
-                            title: Row(
-                              children: [
-                                const Icon(
-                                  Icons.calendar_today_outlined,
-                                  color: CustomColors.color1,
-                                ),
-                                SizedBox(
-                                  width: 10.w,
-                                ),
-                                Text(
-                                  state.startDate.isEmpty
-                                      ? 'No Date'
-                                      : DateFormat('dd MMMM yyyy').format(
-                                          DateTime.parse(
-                                            state.startDate,
-                                          ),
-                                        ),
-                                  style: state.startDate.isEmpty
-                                      ? CustomTypography.textFieldHint
-                                      : CustomTypography.textFieldValue,
-                                ),
-                              ],
-                            ),
-                            shape: RoundedRectangleBorder(
-                              side: const BorderSide(
-                                color: CustomColors.color10,
-                              ),
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                          ),
+                        _buildStartDate(
+                          context,
+                          cubit,
+                          state,
                         ),
                         Padding(
                           padding: EdgeInsets.symmetric(
@@ -226,50 +143,10 @@ class _AddEditEmployeeState extends State<AddEditEmployee> {
                             color: CustomColors.color1,
                           ),
                         ),
-                        Expanded(
-                          child: ListTile(
-                            contentPadding:
-                                EdgeInsets.symmetric(horizontal: 10.w),
-                            onTap: () => showDialog(
-                              context: context,
-                              builder: (context) => SelectDateDialog(
-                                cubit: cubit,
-                                firstDay: firstDay,
-                                lastDay: lastDay,
-                                isStartDate: false,
-                                calendarFormat: _calendarFormat,
-                              ),
-                            ),
-                            title: Row(
-                              children: [
-                                const Icon(
-                                  Icons.calendar_today_outlined,
-                                  color: CustomColors.color1,
-                                ),
-                                SizedBox(
-                                  width: 10.w,
-                                ),
-                                Text(
-                                  state.endDate == null
-                                      ? 'No Date'
-                                      : DateFormat('dd MMMM yyyy').format(
-                                          DateTime.parse(
-                                            state.endDate ?? '',
-                                          ),
-                                        ),
-                                  style: state.startDate.isEmpty
-                                      ? CustomTypography.textFieldHint
-                                      : CustomTypography.textFieldValue,
-                                ),
-                              ],
-                            ),
-                            shape: RoundedRectangleBorder(
-                              side: const BorderSide(
-                                color: CustomColors.color10,
-                              ),
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                          ),
+                        _buildEndDate(
+                          context,
+                          cubit,
+                          state,
                         ),
                       ],
                     ),
@@ -278,42 +155,154 @@ class _AddEditEmployeeState extends State<AddEditEmployee> {
               ),
               const Spacer(),
               const Divider(),
-              Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: 20.w,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text(
-                        'Cancel',
-                      ),
-                    ),
-                    SizedBox(
-                      width: 20.w,
-                    ),
-                    state.isSaving
-                        ? SizedBox(
-                            height: 35.h,
-                            width: 25.w,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.5.w,
-                            ),
-                          )
-                        : ElevatedButton(
-                            onPressed: () => cubit.addEmployee(),
-                            child: const Text(
-                              'Save',
-                            ),
-                          ),
-                  ],
-                ),
+              _buildSaveCancelButton(
+                context,
+                state,
+                cubit,
               ),
             ],
           );
         },
+      ),
+    );
+  }
+
+  Padding _buildSaveCancelButton(
+    BuildContext context,
+    AddEditEmployeeState state,
+    AddEditEmployeeCubit cubit,
+  ) {
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: 20.w,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text(
+              'Cancel',
+            ),
+          ),
+          SizedBox(
+            width: 20.w,
+          ),
+          state.isSaving
+              ? SizedBox(
+                  height: 35.h,
+                  width: 25.w,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5.w,
+                  ),
+                )
+              : ElevatedButton(
+                  onPressed: () => cubit.addEmployee(),
+                  child: const Text(
+                    'Save',
+                  ),
+                ),
+        ],
+      ),
+    );
+  }
+
+  Expanded _buildEndDate(BuildContext context, AddEditEmployeeCubit cubit,
+      AddEditEmployeeState state) {
+    return Expanded(
+      child: ListTile(
+        contentPadding: EdgeInsets.symmetric(horizontal: 10.w),
+        onTap: () => showDialog(
+          context: context,
+          builder: (context) => SelectDateDialog(
+            cubit: cubit,
+            firstDay: firstDay,
+            lastDay: lastDay,
+            isStartDate: false,
+            calendarFormat: _calendarFormat,
+          ),
+        ),
+        title: Row(
+          children: [
+            const Icon(
+              Icons.calendar_today_outlined,
+              color: CustomColors.color1,
+            ),
+            SizedBox(
+              width: 10.w,
+            ),
+            Text(
+              state.endDate == null
+                  ? 'No Date'
+                  : DateFormat('dd MMMM yyyy').format(
+                      DateTime.parse(
+                        state.endDate ?? '',
+                      ),
+                    ),
+              style: state.startDate.isEmpty
+                  ? CustomTypography.textFieldHint
+                  : CustomTypography.textFieldValue,
+            ),
+          ],
+        ),
+        shape: RoundedRectangleBorder(
+          side: const BorderSide(
+            color: CustomColors.color10,
+          ),
+          borderRadius: BorderRadius.circular(5),
+        ),
+      ),
+    );
+  }
+
+  Expanded _buildStartDate(
+    BuildContext context,
+    AddEditEmployeeCubit cubit,
+    AddEditEmployeeState state,
+  ) {
+    return Expanded(
+      child: ListTile(
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: 10.w,
+        ),
+        onTap: () => showDialog(
+          context: context,
+          builder: (context) => SelectDateDialog(
+            cubit: cubit,
+            firstDay: firstDay,
+            lastDay: lastDay,
+            calendarFormat: _calendarFormat,
+          ),
+        ),
+        title: Row(
+          children: [
+            const Icon(
+              Icons.calendar_today_outlined,
+              color: CustomColors.color1,
+            ),
+            SizedBox(
+              width: 10.w,
+            ),
+            Text(
+              state.startDate.isEmpty
+                  ? 'No Date'
+                  : DateFormat('dd MMMM yyyy').format(
+                      DateTime.parse(
+                        state.startDate,
+                      ),
+                    ),
+              style: state.startDate.isEmpty
+                  ? CustomTypography.textFieldHint
+                  : CustomTypography.textFieldValue,
+            ),
+          ],
+        ),
+        shape: RoundedRectangleBorder(
+          side: const BorderSide(
+            color: CustomColors.color10,
+          ),
+          borderRadius: BorderRadius.circular(5),
+        ),
       ),
     );
   }

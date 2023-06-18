@@ -1,8 +1,7 @@
 // ignore_for_file: depend_on_referenced_packages
 
-import 'dart:math';
-
 import 'package:bloc/bloc.dart';
+import 'package:dartz/dartz.dart';
 import 'package:employees/features/employees/data/model/employee.dart';
 import 'package:employees/features/employees/data/repository/repository.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -11,16 +10,30 @@ part 'add_edit_employee_dart_state.dart';
 part 'add_edit_employee_dart_cubit.freezed.dart';
 
 class AddEditEmployeeCubit extends Cubit<AddEditEmployeeState> {
-  AddEditEmployeeCubit(
-    this.employeeRepository,
-  ) : super(AddEditEmployeeState.initial());
+  AddEditEmployeeCubit({
+    this.employee,
+    required this.employeeRepository,
+  }) : super(AddEditEmployeeState.initial()) {
+    if (employee != null) {
+      emit(
+        state.copyWith(
+          name: employee!.name!,
+          role: employee!.role!,
+          startDate: employee!.startDate!,
+          endDate: employee!.endDate == null ? null : employee!.endDate!,
+        ),
+      );
+    }
+  }
 
   final EmployeeRepository employeeRepository;
+  final Employee? employee;
 
   void updateName(String name) {
     emit(
       state.copyWith(
         name: name,
+        errorMessage: null,
       ),
     );
   }
@@ -29,27 +42,32 @@ class AddEditEmployeeCubit extends Cubit<AddEditEmployeeState> {
     emit(
       state.copyWith(
         role: role,
+        errorMessage: null,
       ),
     );
   }
 
-  void updatestartDate(String date) {
+  void updateStartDate(String date) {
     emit(
       state.copyWith(
         startDate: date,
+        errorMessage: null,
       ),
     );
   }
 
-  void updateendDate(String date) {
+  void updateEndDate(String date) {
     emit(
-      state.copyWith(endDate: date),
+      state.copyWith(
+        endDate: date,
+        errorMessage: null,
+      ),
     );
   }
 
   void selectDate({
     required DateTime? selectedDay,
-    bool isStartDate = true,
+    required bool isStartDate,
   }) {
     if (isStartDate) {
       emit(
@@ -62,8 +80,28 @@ class AddEditEmployeeCubit extends Cubit<AddEditEmployeeState> {
     }
   }
 
+//This method is called when save button is pressed and user won't change the
+//date
+  void selectDatePress({
+    required bool isStartDate,
+  }) {
+    if (isStartDate) {
+      emit(
+        state.copyWith(
+          startDate: DateTime.now().toIso8601String(),
+        ),
+      );
+    } else {
+      emit(
+        state.copyWith(
+          endDate: DateTime.now().toIso8601String(),
+        ),
+      );
+    }
+  }
+
   void selectToday({
-    bool isStartDate = true,
+    required bool isStartDate,
   }) {
     if (isStartDate) {
       emit(
@@ -77,7 +115,7 @@ class AddEditEmployeeCubit extends Cubit<AddEditEmployeeState> {
   }
 
   void selectNextMonday({
-    bool isStartDate = true,
+    required bool isStartDate,
   }) {
     if (isStartDate) {
       emit(
@@ -97,7 +135,7 @@ class AddEditEmployeeCubit extends Cubit<AddEditEmployeeState> {
   }
 
   void selectNextTuesday({
-    bool isStartDate = true,
+    required bool isStartDate,
   }) {
     if (isStartDate) {
       emit(
@@ -117,7 +155,7 @@ class AddEditEmployeeCubit extends Cubit<AddEditEmployeeState> {
   }
 
   void selectAfterOneWeek({
-    bool isStartDate = true,
+    required bool isStartDate,
   }) {
     if (isStartDate) {
       emit(
@@ -163,26 +201,44 @@ class AddEditEmployeeCubit extends Cubit<AddEditEmployeeState> {
     if (isNameValid && isRoleValid && isStartDateValid) {
       emit(state.copyWith(isSaving: true));
 
-      final employee = Employee(
+      final Either<String, int> employeeResponse;
+
+      final employeeData = Employee(
         name: state.name,
         role: state.role,
         startDate: state.startDate,
         endDate: state.endDate,
       );
-      final employeeDetails = await employeeRepository.saveEmployeeDetails(
-        employee,
-      );
 
-      employeeDetails.fold(
+      if (employee == null) {
+        employeeResponse = await employeeRepository.saveEmployeeDetails(
+          employeeData,
+        );
+      } else {
+        final employeeData = Employee(
+          id: employee!.id,
+          name: state.name,
+          role: state.role,
+          startDate: state.startDate,
+          endDate: state.endDate,
+        );
+        employeeResponse = await employeeRepository.updateEmployees(
+          employeeData,
+        );
+      }
+
+      employeeResponse.fold(
         (l) => emit(
           state.copyWith(
             errorMessage: l,
+            isSaving: false,
           ),
         ),
         (r) async {
           emit(
             state.copyWith(
               isSaved: true,
+              isSaving: false,
             ),
           );
         },

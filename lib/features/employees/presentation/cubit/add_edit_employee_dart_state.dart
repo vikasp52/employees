@@ -19,7 +19,6 @@ abstract class AddEditEmployeeState with _$AddEditEmployeeState {
         name: '',
         role: '',
         startDate: '',
-        endDate: null,
         isSaving: false,
         isSaved: false,
         isNameValid: false,

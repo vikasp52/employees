@@ -53,7 +53,10 @@ class RouteGenerator {
       case addEditEmployeeRoute:
         screen = BlocProvider(
           create: (context) => AddEditEmployeeCubit(
-            serviceLocator<EmployeeRepository>(),
+            employeeRepository: serviceLocator<EmployeeRepository>(),
+            employee: routeSettings.arguments != null
+                ? routeSettings.arguments as Employee
+                : null,
           ),
           child: const AddEditEmployee(),
         );

@@ -22,8 +22,6 @@ class EmployeesCubit extends Cubit<EmployeesState> {
 
     final employees = await employeeRepository.getEmployees();
 
-    print('employees in cubit: ${employees.length()}');
-
     employees.fold(
       (l) => emit(EmployeesState.error(
         l,

@@ -43,6 +43,7 @@ dependencies:
   flutter_slidable: ^3.0.0
   table_calendar: ^3.0.9
   sqflite: ^2.2.8+4
+  intl: ^0.18.1
 
 
 dev_dependencies:
